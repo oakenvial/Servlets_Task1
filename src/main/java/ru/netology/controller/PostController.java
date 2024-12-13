@@ -4,12 +4,13 @@ import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.netology.model.Post;
 import ru.netology.service.PostService;
-
 import java.io.IOException;
 import java.io.Reader;
 
+
 public class PostController {
     public static final String APPLICATION_JSON = "application/json";
+    public static final String TEXT_HTML = "text/html";
     private final PostService service;
 
     public PostController(PostService service) {
@@ -23,19 +24,24 @@ public class PostController {
         response.getWriter().print(gson.toJson(data));
     }
 
-    public void getById(long id, HttpServletResponse response) {
-        // TODO: deserialize request & serialize response
-    }
-
-    public void save(Reader body, HttpServletResponse response) throws IOException {
+    public void getById(long id, HttpServletResponse response) throws IOException {
         response.setContentType(APPLICATION_JSON);
+        final var data = service.getById(id);
         final var gson = new Gson();
-        final var post = gson.fromJson(body, Post.class);
-        final var data = service.save(post);
         response.getWriter().print(gson.toJson(data));
     }
 
-    public void removeById(long id, HttpServletResponse response) {
-        // TODO: deserialize request & serialize response
+    public void save(Reader body, HttpServletResponse response) throws IOException {
+        response.setContentType(TEXT_HTML);
+        final var gson = new Gson();
+        final var post = gson.fromJson(body, Post.class);
+        final var data = service.save(post);
+        response.getWriter().print(data);
+    }
+
+    public void removeById(long id, HttpServletResponse response) throws IOException {
+        response.setContentType(TEXT_HTML);
+        final var data = service.removeById(id);
+        response.getWriter().print(data);
     }
 }

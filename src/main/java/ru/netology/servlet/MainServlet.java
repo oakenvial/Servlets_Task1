@@ -4,8 +4,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.netology.controller.PostController;
+import ru.netology.exception.NotFoundException;
 import ru.netology.repository.PostRepository;
 import ru.netology.service.PostService;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class MainServlet extends HttpServlet {
@@ -28,13 +32,16 @@ public class MainServlet extends HttpServlet {
                 return;
             }
 
-            if (path.matches("/api/posts/\\d+")) {
-                final long postId = Long.parseLong(path.substring(path.lastIndexOf("/")));
-                controller.getById(postId, resp);
-                return;
+            Pattern p = Pattern.compile("/api/posts/(\\d+)");
+            Matcher m = p.matcher(path);
+            if (m.matches()) {
+                final long postId = Long.parseLong(m.group(1));
+                try {
+                    controller.getById(postId, resp);
+                } catch (NotFoundException e) {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                }
             }
-
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {
             System.out.println("Error while handling GET request");
             e.printStackTrace();
@@ -62,8 +69,10 @@ public class MainServlet extends HttpServlet {
         try {
             final var path = req.getRequestURI();
 
-            if (path.matches("/api/posts/\\d+")) {
-                final long postId = Long.parseLong(path.substring(path.lastIndexOf("/")));
+            Pattern p = Pattern.compile("/api/posts/(\\d+)");
+            Matcher m = p.matcher(path);
+            if (m.matches()) {
+                final long postId = Long.parseLong(m.group(1));
                 controller.removeById(postId, resp);
             }
         } catch (Exception e) {
